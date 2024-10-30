@@ -36,16 +36,11 @@ int	quick_atoi(char *str)
 	neg = 1;
 	while (*str && (*str == ' ' || *str == '\t'))
 		str++;
-	if (*str && (*str == '+' || *str == '-'))
-	{
-		if (*str == '-')
-			return (-1);
-		str++;
-	}
 	ret = 0;
 	while (*str && *str >= '0' && *str <= '9')
 	{
-		ret = ret * 10 + ((*str % 10) + '0');
+		ret = (ret * 10) + (*str - '0');
+		str++;
 	}
 	return (ret);
 }
