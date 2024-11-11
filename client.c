@@ -7,39 +7,64 @@ void	send_byte(int pid, char c)
 	i = 0;
 	while (i < 8)
 	{
-		if ((c & 1) == 0)
-		{
-			u_putnbr(0);
-			kill(pid, SIGUSR1);
-		}
-		else if ((c & 1) == 1)
-		{
-			u_putnbr(1);
+		if (c & (1 << i))
 			kill(pid, SIGUSR2);
-		}
-		c = c >> 1;
+		else
+			kill(pid, SIGUSR1);
 		i++;
-		write(1, "\n", 1);
-		usleep(200000);
+		usleep(WAIT);
 	}
 }
 
+void	get_signal(int sig, siginfo_t *info, void *context)
+{
+	(void)context;
+	if (g_pid != info->si_pid)
+		return ;
+	if (sig == SIGUSR1)
+	{
+		ft_putstr("Message sent successfully\n");
+		exit(0);
+	}
+	if (sig == SIGUSR2)
+	{
+		ft_putstr("Message sending fail\n");
+		exit(1);
+	}
+}
+
+void	send_null(void)
+{
+	send_byte(g_pid, 0);
+	send_byte(g_pid, 0);
+	send_byte(g_pid, 0);
+	send_byte(g_pid, 0);
+}
 
 int	main(int argc, char **argv)
 {
-	char	*s;
-	int		at_rtn;
+	struct sigaction	sa;
 
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_sigaction = get_signal;
 	if (argc != 3)
 		return (print_usage(argv[0]));
-	s = argv[2];
-	if (!s)
+	if (!argv[2])
 		return (0);
-	at_rtn = quick_atoi(argv[1]);
-	while (*s)
+	g_pid = quick_atoi(argv[1]);
+	if (sigaction(SIGUSR1, &sa, NULL) < 0
+		|| sigaction(SIGUSR2, &sa, NULL) < 0)
 	{
-		send_byte(at_rtn, *s);
-		s++;
+		ft_putstr("Signal couldn't reach destination\n");
+		return (1);
 	}
-	return (0);
+	while (*argv[2])
+	{
+		send_byte(g_pid, *argv[2]);
+		argv[2]++;
+	}
+	send_null();
+	sleep(3);
+	ft_putstr("Fail to send message\n");
+	return (1);
 }

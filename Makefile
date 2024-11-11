@@ -14,6 +14,10 @@ CFLAGS	=	-Wall -Wextra -Werror
 CC		=	cc
 RM		=	rm -f
 
+ifeq ($(DEBUG),debug)
+	CFLAGS += -fsanitize=address -g
+endif
+
 all: $(C_NAME) $(S_NAME)
 	@printf "all: Done\n"
 

@@ -1,5 +1,15 @@
 #include "minitalk.h"
 
+int	ft_strlen(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+		i++;
+	return (i);
+}
+
 void	u_putnbr(unsigned int n)
 {
 	const char	c = (n % 10) + '0';
